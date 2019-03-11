@@ -8,7 +8,7 @@ cryptography==2.1.4
 EasyProcess==0.2.5
 enum34==1.1.6
 freeze==1.0.10
-idna==2.6
+idna==2.7
 ipaddress==1.0.17
 keyring==10.6.0
 keyrings.alt==3.0
