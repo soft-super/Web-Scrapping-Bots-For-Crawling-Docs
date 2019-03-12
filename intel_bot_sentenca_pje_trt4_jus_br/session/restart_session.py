@@ -1,4 +1,4 @@
-from intel_bot_sentenca_rs_trt_pje.trt4_jus_parser import Bot
+from intel_bot_sentenca_pje_trt4_jus_br.trt4_jus_parser import Bot
 """
 Purpose this script support alive session to digital server
 This script need set in crontab and set run every 30 min
