@@ -6,7 +6,6 @@ sys.setdefaultencoding('utf8')
 
 import time
 import logging
-import pickle
 import unicodedata
 
 from selenium import webdriver
@@ -15,11 +14,15 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import pdfkit
+import requests
 
 
 BASE_URL = 'https://pje.trt4.jus.br'
 SEARCH_PAGE = 'https://pje.trt4.jus.br/primeirograu/Processo/' \
               'ConsultaProcessoTerceiros/listView.seam'
+DIGIGTAL_API_URL = 'http://127.0.0.1:9090/'
+DIGIGTAL_USERNAME = 'admin'
+DIGIGTAL_PASSWORD = '123098'
 
 logging.basicConfig(
     filename='errors.log',
@@ -29,28 +32,10 @@ logging.basicConfig(
 
 
 class Bot(object):
-    def __init__(
-            self,
-            headless=False,
-            load_session=False,
-            save_session=False,
-            file_name_session='cookies_trt4.pkl'
-    ):
+    def __init__(self, headless=False):
         self.headless = headless
         self.driver = self.setup_driver()
-        self.load_session = load_session
-        self.save_session = save_session
-        self.file_name_session = file_name_session
-
-        if self.save_session:
-            self.write_session_cookie()
-
-        elif self.load_session:
-            self.driver.get(BASE_URL)
-            self.load_session_cookie()
-
-        else:
-            self._login()
+        self._login()
 
     def setup_driver(self):
         options = webdriver.FirefoxOptions()
@@ -83,23 +68,38 @@ class Bot(object):
 
     def _login(self):
         self.driver.get(BASE_URL)
+
         if self.is_visible_element('id', 'loginAplicacaoButton'):
-            self.driver.find_element_by_id('loginAplicacaoButton').click()
-            time.sleep(5)
+            key = self.driver.find_element_by_id(id_='tokenAssinatura').get_attribute('innerHTML')
 
-    def write_session_cookie(self):
-        pickle.dump(
-            self.driver.get_cookies(),
-            open("{file_session}".format(
-                file_session=self.file_name_session
-            ), "wb"))
+            session = requests.session()
+            session.get(DIGIGTAL_API_URL + 'admin/login/?next=/admin/')
+            token = session.cookies['csrftoken']
+            login_data = dict(
+                username=DIGIGTAL_USERNAME,
+                password=DIGIGTAL_PASSWORD,
+                csrfmiddlewaretoken=token
+            )
+            session.post(
+                DIGIGTAL_API_URL + 'admin/login/?next=/admin/',
+                data=login_data
+            )
 
-    def load_session_cookie(self):
-        self.driver.delete_all_cookies()
-        for cookie in pickle.load(
-            open("{file_session}".format(
-                file_session=self.file_name_session), "rb")):
-            self.driver.add_cookie(cookie)
+            # send key on API server
+            response = session.get(DIGIGTAL_API_URL + 'digital_api/get_signed_key/?key={}'.format(key)).json()
+
+            # Fill form values of 'signature' and 'certChain'
+            if response['status'] == 'ok':
+                self.driver.execute_script(
+                    "document.getElementById('signature').value = '{}';".format(response['signature']))
+                self.driver.execute_script(
+                    "document.getElementById('certChain').value = '{}';".format(response['certChain']))
+                self.driver.execute_script('submitForm();')
+                time.sleep(5)
+
+            else:
+                logging.warning('Login failed!')
+                self.driver.quit()
 
     def get_search_page(self):
         self.driver.get(SEARCH_PAGE)
@@ -183,7 +183,12 @@ class Bot(object):
 
             self.driver.close()
             self.switch_to_window(0)
-            pdf_file = self.generate_pdf(page_content.encode('utf-8'))
+            try:
+                pdf_file = self.generate_pdf(page_content.encode('utf-8'))
+
+            except Exception as e:
+                logging.warning('Error generate pdf file: {}'.format(e))
+                return None
 
             return pdf_file
 
@@ -220,9 +225,7 @@ class HeadlessPdfKit(pdfkit.PDFKit):
 
 
 if __name__ == '__main__':
-    # b = Bot(load_session=False, file_name_session='/Users/oleh.hrebchuk/myprojects/pje_trt4_jus_br_scraper/session/cookies_trt4.pkl')
     b = Bot()
     search_words = [u"Sentença"]
-    # b.write_session_cookie()
     b.parse('0021261-70.2015.5.04.0030', search_words)
     b.driver.quit()
