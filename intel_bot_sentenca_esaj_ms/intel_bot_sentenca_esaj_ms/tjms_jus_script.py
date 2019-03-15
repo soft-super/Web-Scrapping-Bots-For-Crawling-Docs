@@ -172,7 +172,8 @@ class ESAJAutomation(object):
             self.driver.get(BASE_URL)
             self.driver.find_element_by_css_selector("input[id='usernameForm']").send_keys(LOGIN)
             self.driver.find_element_by_css_selector("input[id='passwordForm']").send_keys(PASSWORD)
-            self.driver.find_element_by_css_selector("input[id='pbEntrar']").click()   
+            self.driver.find_element_by_css_selector("input[id='pbEntrar']").click()
+            time.sleep(2)
             if not self.is_visible('selector', 'table.esajTabelaServico'):
                 logging.warning(
                     '{} - Login information is not correct'.format(
