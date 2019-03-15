@@ -15,7 +15,6 @@ keyrings.alt==3.0
 pdfkit==0.6.1
 Pillow==5.4.1
 pycrypto==2.6.1
-pygobject==3.27.0
 pyperclip==1.7.0
 PyVirtualDisplay==0.2.1
 pyxdg==0.25
