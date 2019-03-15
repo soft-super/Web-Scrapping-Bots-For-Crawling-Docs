@@ -16,8 +16,8 @@ from selenium.webdriver.support import expected_conditions as EC
 import pdfkit
 import requests
 
-BASE_URL = 'https://pje.trt17.jus.br/primeirograu/login.seam'
-SEARCH_PAGE = 'https://pje.trt17.jus.br/primeirograu/Processo/ConsultaProcessoTerceiros/listView.seam'
+BASE_URL = 'https://pje.trt18.jus.br/primeirograu/login.seam'
+SEARCH_PAGE = 'https://pje.trt18.jus.br/primeirograu/Processo/ConsultaProcessoTerceiros/listView.seam'
 DIGIGTAL_API_URL = 'http://127.0.0.1:10080/'
 DIGIGTAL_USERNAME = 'admin'
 DIGIGTAL_PASSWORD = '123098'

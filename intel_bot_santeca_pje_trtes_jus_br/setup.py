@@ -1,6 +1,6 @@
 from setuptools import setup
 
-setup(name="intel_bot_santeca_pje_trtsp_jus_br",
+setup(name="intel_bot_santeca_pje_trtes_jus_br",
       version="1.0",
-      packages=["intel_bot_santeca_pje_trtsp_jus_br"],
+      packages=["intel_bot_santeca_pje_trtes_jus_br"],
       scripts=['bin/geckodriver'])
