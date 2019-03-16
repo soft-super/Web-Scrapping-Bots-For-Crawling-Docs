@@ -1,0 +1,11 @@
+*.pyc
+*.png
+*.pdf
+.idea/
+.DS_Store
+*.csv
+*.log
+build/
+intel_bot_sentenca_sp_trt_pje.egg-info/
+dist/
+.vagrant/
