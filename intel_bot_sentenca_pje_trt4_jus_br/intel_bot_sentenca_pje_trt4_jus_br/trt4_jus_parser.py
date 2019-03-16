@@ -20,9 +20,6 @@ import requests
 BASE_URL = 'https://pje.trt4.jus.br'
 SEARCH_PAGE = 'https://pje.trt4.jus.br/primeirograu/Processo/' \
               'ConsultaProcessoTerceiros/listView.seam'
-DIGIGTAL_API_URL = 'http://127.0.0.1:9090/'
-DIGIGTAL_USERNAME = 'admin'
-DIGIGTAL_PASSWORD = '123098'
 
 logging.basicConfig(
     filename='errors.log',
