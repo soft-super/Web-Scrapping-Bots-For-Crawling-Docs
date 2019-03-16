@@ -16,11 +16,9 @@ from selenium.webdriver.support import expected_conditions as EC
 import pdfkit
 import requests
 
+
 BASE_URL = 'https://pje.trt12.jus.br/primeirograu/login.seam'
 SEARCH_PAGE = 'https://pje.trt12.jus.br/primeirograu/Processo/ConsultaProcessoTerceiros/listView.seam'
-DIGIGTAL_API_URL = 'http://127.0.0.1:10080/'
-DIGIGTAL_USERNAME = 'admin'
-DIGIGTAL_PASSWORD = '123098'
 
 logging.basicConfig(
     filename='errors.log',
@@ -30,8 +28,17 @@ logging.basicConfig(
 
 
 class Bot(object):
-    def __init__(self, headless=False):
+    def __init__(
+            self,
+            digital_user,
+            digital_password,
+            digital_api_url='http://rpa-ui-prod.intelligenti.com.br/',
+            headless=False
+    ):
         self.headless = headless
+        self.digital_api_url = digital_api_url
+        self.digital_user = digital_user
+        self.digital_password = digital_password
         self.driver = self.setup_driver()
         self._login()
 
@@ -72,21 +79,21 @@ class Bot(object):
                 id_='tokenAssinatura').get_attribute('innerHTML')
 
             session = requests.session()
-            session.get(DIGIGTAL_API_URL + 'admin/login/?next=/admin/')
+            session.get(self.digital_api_url + 'admin/login/?next=/admin/')
             token = session.cookies['csrftoken']
             login_data = dict(
-                username=DIGIGTAL_USERNAME,
-                password=DIGIGTAL_PASSWORD,
+                username=self.digital_user,
+                password=self.digital_password,
                 csrfmiddlewaretoken=token
             )
             session.post(
-                DIGIGTAL_API_URL + 'admin/login/?next=/admin/',
+                self.digital_api_url + 'admin/login/?next=/admin/',
                 data=login_data
             )
 
             # send key on API server
             response = session.get(
-                DIGIGTAL_API_URL + 'digital_api/get_signed_key/?key={}'.format(
+                self.digital_api_url + 'digital_api/get_signed_key/?key={}'.format(
                     key)).json()
 
             # Fill form values of 'signature' and 'certChain'
@@ -228,7 +235,7 @@ class HeadlessPdfKit(pdfkit.PDFKit):
 
 
 if __name__ == '__main__':
-    b = Bot()
+    b = Bot(digital_user='admin', digital_password='123098skd123!98S_')
     search_words = [u"Sentença"]
     b.parse('0001329-25.2012.5.01.0341', search_words)
     b.parse('0010059-02.2015.5.01.0541', search_words)
