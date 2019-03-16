@@ -32,8 +32,17 @@ logging.basicConfig(
 
 
 class Bot(object):
-    def __init__(self, headless=False):
+    def __init__(
+            self,
+            digital_user,
+            digital_password,
+            digital_api_url='http://rpa-ui-prod.intelligenti.com.br/',
+            headless=False
+    ):
         self.headless = headless
+        self.digital_api_url = digital_api_url
+        self.digital_user = digital_user
+        self.digital_password = digital_password
         self.driver = self.setup_driver()
         self._login()
 
@@ -70,23 +79,26 @@ class Bot(object):
         self.driver.get(BASE_URL)
 
         if self.is_visible_element('id', 'loginAplicacaoButton'):
-            key = self.driver.find_element_by_id(id_='tokenAssinatura').get_attribute('innerHTML')
+            key = self.driver.find_element_by_id(
+                id_='tokenAssinatura').get_attribute('innerHTML')
 
             session = requests.session()
-            session.get(DIGIGTAL_API_URL + 'admin/login/?next=/admin/')
+            session.get(self.digital_api_url + 'admin/login/?next=/admin/')
             token = session.cookies['csrftoken']
             login_data = dict(
-                username=DIGIGTAL_USERNAME,
-                password=DIGIGTAL_PASSWORD,
+                username=self.digital_user,
+                password=self.digital_password,
                 csrfmiddlewaretoken=token
             )
             session.post(
-                DIGIGTAL_API_URL + 'admin/login/?next=/admin/',
+                self.digital_api_url + 'admin/login/?next=/admin/',
                 data=login_data
             )
 
             # send key on API server
-            response = session.get(DIGIGTAL_API_URL + 'digital_api/get_signed_key/?key={}'.format(key)).json()
+            response = session.get(
+                self.digital_api_url + 'digital_api/get_signed_key/?key={}'.format(
+                    key)).json()
 
             # Fill form values of 'signature' and 'certChain'
             if response['status'] == 'ok':
@@ -225,7 +237,7 @@ class HeadlessPdfKit(pdfkit.PDFKit):
 
 
 if __name__ == '__main__':
-    b = Bot()
+    b = Bot(digital_user='admin', digital_password='123098skd123!98S_')
     search_words = [u"Sentença"]
     b.parse('0021261-70.2015.5.04.0030', search_words)
     b.driver.quit()

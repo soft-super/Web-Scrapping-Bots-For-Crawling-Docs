@@ -22,7 +22,7 @@ parse() - return pdf text or None
 from intel_bot_sentenca_pje_trt4_jus_br.trt4_jus_parser import Bot
 
 search_words = ["Sentença"]
-b = Bot(headless=True)
+b = Bot(headless=True, digital_user='admin', digital_password='123098skd123!98S_')
 search_words = [u"Sentença"]
 b.parse('0021261-70.2015.5.04.0030', search_words)
 b.driver.quit()
