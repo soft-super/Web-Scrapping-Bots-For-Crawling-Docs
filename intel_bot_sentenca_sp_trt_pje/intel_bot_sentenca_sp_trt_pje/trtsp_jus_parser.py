@@ -271,7 +271,7 @@ class HeadlessPdfKit(pdfkit.PDFKit):
 if __name__ == '__main__':
     bot = Bot(
         digital_user='admin',
-        digital_password='123098')
+        digital_password='123098skd123!98S_')
     search_words = [u"Sentença"]
     bot.parse('1000520-81.2016.5.02.0007', search_words)
     bot.parse('0010059-02.2015.5.01.0541', search_words)
