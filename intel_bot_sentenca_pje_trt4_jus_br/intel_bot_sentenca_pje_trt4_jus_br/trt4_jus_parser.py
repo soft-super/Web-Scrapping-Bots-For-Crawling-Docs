@@ -60,18 +60,6 @@ class Bot(object):
 
         return driver
 
-    def is_visible_element(self, by_type, locator, timeout=10):
-        locators = ['name', 'id']
-        try:
-            if by_type in locators:
-                WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located((By.ID, locator)))
-                return True
-
-        except Exception:
-            return False
-
-        return False
-
     def _login(self):
         self.driver.get(BASE_URL)
 
@@ -110,6 +98,28 @@ class Bot(object):
                 logging.warning('Login failed!')
                 self.driver.quit()
 
+    def is_visible_element(self, by_type, locator, timeout=20):
+        try:
+            if by_type == "name":
+                element = WebDriverWait(self.driver, timeout).until(
+                    EC.visibility_of_element_located((By.NAME, locator)))
+            elif by_type == "selector":
+                element = WebDriverWait(self.driver, timeout).until(
+                    EC.visibility_of_element_located(
+                        (By.CSS_SELECTOR, locator)))
+            elif by_type == "xpath":
+                element = WebDriverWait(self.driver, timeout).until(
+                    EC.visibility_of_element_located((By.XPATH, locator)))
+            elif by_type == "class":
+                element = WebDriverWait(self.driver, timeout).until(
+                    EC.visibility_of_element_located((By.CLASS_NAME, locator)))
+            else:
+                element = WebDriverWait(self.driver, timeout).until(
+                    EC.visibility_of_element_located((By.ID, locator)))
+            return True
+        except Exception:
+            return False
+
     def get_search_page(self):
         self.driver.get(SEARCH_PAGE)
 
@@ -133,12 +143,21 @@ class Bot(object):
             ").value = arguments[0]",
             number
         )
+
+        if not self.is_visible_element('id', 'pesquisarProcessoTerceiroForm:searchButton'):
+            logging.warning('Error load page.')
+            return None
+
         self.driver.find_element_by_id(
             'pesquisarProcessoTerceiroForm:searchButton'
         ).click()
         time.sleep(5)
 
         try:
+            if not self.is_visible_element('id', 'consultaProcessoTerceirosList:tb'):
+                logging.warning('Error load page')
+                return None
+
             self.driver.find_element_by_id(
                 'consultaProcessoTerceirosList:tb'
             ).find_element_by_css_selector('tr form a').click()
@@ -150,6 +169,11 @@ class Bot(object):
         time.sleep(2)
         if len(self.driver.window_handles) == 2:
             self.switch_to_window(1)
+
+            if not self.is_visible_element('id', 'consultaProcessoDocumentoForm:'
+                'comboTipoDocumentoDecoration:comboTipoDocumento'):
+                logging.warning('Error load page')
+                return None
 
             select_type = Select(self.driver.find_element_by_id(
                 'consultaProcessoDocumentoForm:'
@@ -169,12 +193,19 @@ class Bot(object):
             except StopIteration:
                 pass
 
+            if not self.is_visible_element('id', 'consultaProcessoDocumentoForm:searchButon'):
+                logging.warning('Error load page')
+                return None
+
             self.driver.find_element_by_id(
                 'consultaProcessoDocumentoForm:searchButon'
             ).click()
             time.sleep(6)
 
             try:
+                if not self.is_visible_element('id', 'processoDocumentoGridTabList:tb'):
+                    logging.warning('Error load page')
+                    return None
                 self.driver.find_element_by_id(
                     'processoDocumentoGridTabList:tb').find_element_by_css_selector(
                     'tr').find_elements_by_css_selector('td')[5].find_element_by_tag_name('img').click()
