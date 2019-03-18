@@ -155,7 +155,7 @@ class Bot(object):
 
         try:
             if not self.is_visible_element('id', 'consultaProcessoTerceirosList:tb'):
-                logging.warning('Error load page')
+                logging.warning('Number was not found {}'.format(number))
                 return None
 
             self.driver.find_element_by_id(
