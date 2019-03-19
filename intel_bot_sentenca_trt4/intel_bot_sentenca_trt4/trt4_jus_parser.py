@@ -54,11 +54,33 @@ class Bot(object):
             options=options,
             executable_path='geckodriver'
         )
-        driver.set_page_load_timeout(15)
-        driver.implicitly_wait(15)
+        driver.set_page_load_timeout(30)
+        driver.implicitly_wait(30)
         driver.set_window_size(1360, 900)
 
         return driver
+
+    def is_visible_element(self, by_type, locator, timeout=20):
+        try:
+            if by_type == "name":
+                element = WebDriverWait(self.driver, timeout).until(
+                    EC.visibility_of_element_located((By.NAME, locator)))
+            elif by_type == "selector":
+                element = WebDriverWait(self.driver, timeout).until(
+                    EC.visibility_of_element_located(
+                        (By.CSS_SELECTOR, locator)))
+            elif by_type == "xpath":
+                element = WebDriverWait(self.driver, timeout).until(
+                    EC.visibility_of_element_located((By.XPATH, locator)))
+            elif by_type == "class":
+                element = WebDriverWait(self.driver, timeout).until(
+                    EC.visibility_of_element_located((By.CLASS_NAME, locator)))
+            else:
+                element = WebDriverWait(self.driver, timeout).until(
+                    EC.visibility_of_element_located((By.ID, locator)))
+            return True
+        except Exception:
+            return False
 
     def _login(self):
         self.driver.get(BASE_URL)
@@ -88,37 +110,17 @@ class Bot(object):
             # Fill form values of 'signature' and 'certChain'
             if response['status'] == 'ok':
                 self.driver.execute_script(
-                    "document.getElementById('signature').value = '{}';".format(response['signature']))
+                    "document.getElementById('signature').value = '{}';".format(
+                        response['signature']))
                 self.driver.execute_script(
-                    "document.getElementById('certChain').value = '{}';".format(response['certChain']))
+                    "document.getElementById('certChain').value = '{}';".format(
+                        response['certChain']))
                 self.driver.execute_script('submitForm();')
                 time.sleep(5)
 
             else:
                 logging.warning('Login failed!')
                 self.driver.quit()
-
-    def is_visible_element(self, by_type, locator, timeout=20):
-        try:
-            if by_type == "name":
-                element = WebDriverWait(self.driver, timeout).until(
-                    EC.visibility_of_element_located((By.NAME, locator)))
-            elif by_type == "selector":
-                element = WebDriverWait(self.driver, timeout).until(
-                    EC.visibility_of_element_located(
-                        (By.CSS_SELECTOR, locator)))
-            elif by_type == "xpath":
-                element = WebDriverWait(self.driver, timeout).until(
-                    EC.visibility_of_element_located((By.XPATH, locator)))
-            elif by_type == "class":
-                element = WebDriverWait(self.driver, timeout).until(
-                    EC.visibility_of_element_located((By.CLASS_NAME, locator)))
-            else:
-                element = WebDriverWait(self.driver, timeout).until(
-                    EC.visibility_of_element_located((By.ID, locator)))
-            return True
-        except Exception:
-            return False
 
     def get_search_page(self):
         self.driver.get(SEARCH_PAGE)
@@ -144,7 +146,8 @@ class Bot(object):
             number
         )
 
-        if not self.is_visible_element('id', 'pesquisarProcessoTerceiroForm:searchButton'):
+        if not self.is_visible_element('id',
+                                       'pesquisarProcessoTerceiroForm:searchButton'):
             logging.warning('Error load page.')
             return None
 
@@ -170,8 +173,9 @@ class Bot(object):
         if len(self.driver.window_handles) == 2:
             self.switch_to_window(1)
 
-            if not self.is_visible_element('id', 'consultaProcessoDocumentoForm:'
-                'comboTipoDocumentoDecoration:comboTipoDocumento'):
+            if not self.is_visible_element('id',
+                                           'consultaProcessoDocumentoForm:'
+                                           'comboTipoDocumentoDecoration:comboTipoDocumento'):
                 logging.warning('Error load page')
                 return None
 
@@ -179,21 +183,15 @@ class Bot(object):
                 'consultaProcessoDocumentoForm:'
                 'comboTipoDocumentoDecoration:comboTipoDocumento'
             ))
-            try:
-                for sw in search_words:
-                    search_word = unicodedata.normalize('NFKD', sw).lower()
+            for sw in search_words:
+                try:
+                    select_type.select_by_visible_text(sw)
+                except Exception:
+                    continue
+                break
 
-                    for index, option in enumerate(select_type.options):
-                        encoded_option = unicodedata.normalize('NFKD', option.text).lower()
-
-                        if search_word == encoded_option:
-                            select_type.select_by_index(index)
-                            raise StopIteration
-
-            except StopIteration:
-                pass
-
-            if not self.is_visible_element('id', 'consultaProcessoDocumentoForm:searchButon'):
+            if not self.is_visible_element('id',
+                                           'consultaProcessoDocumentoForm:searchButon'):
                 logging.warning('Error load page')
                 return None
 
@@ -204,14 +202,16 @@ class Bot(object):
 
             try:
                 if not self.is_visible_element('id', 'processoDocumentoGridTabList:tb'):
-                    logging.warning('Error load page')
+                    logging.warning('Number was not found {}'.format(number))
                     return None
                 self.driver.find_element_by_id(
                     'processoDocumentoGridTabList:tb').find_element_by_css_selector(
-                    'tr').find_elements_by_css_selector('td')[5].find_element_by_tag_name('img').click()
+                    'tr').find_elements_by_css_selector('td')[
+                    5].find_element_by_tag_name('img').click()
 
             except Exception:
-                logging.warning('Number was found {} but fail download pdf'.format(number))
+                logging.warning(
+                    'Number was found {} but fail download pdf'.format(number))
 
             self.driver.close()
             self.switch_to_window(1)
