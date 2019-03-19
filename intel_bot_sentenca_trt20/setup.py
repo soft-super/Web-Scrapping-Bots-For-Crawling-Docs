@@ -1,6 +1,6 @@
 from setuptools import setup
 
-setup(name="intel_bot_sentenca_trt19",
+setup(name="intel_bot_sentenca_trt20",
       version="1.0",
-      packages=["intel_bot_sentenca_trt19"],
+      packages=["intel_bot_sentenca_trt20"],
       scripts=['bin/geckodriver'])
