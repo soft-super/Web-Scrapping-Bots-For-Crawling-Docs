@@ -19,7 +19,7 @@ Xvfb :20 -screen 0 1366x768x16 &
 #### With number
 parse() - return pdf text or None
 ```
->>> from intel_bot_sentenca_trt2.pje_trt3_jus_br_parser import Bot
+>>> from intel_bot_sentenca_trt2.pje_trt2_jus_br_parser import Bot
 >>> b = Bot(headless=True, digital_user='admin', digital_password='123098skd123!98S_')
 >>> search_words = [u"Sentença"]
 >>> b.parse('0001329-25.2012.5.01.0341', search_words)
