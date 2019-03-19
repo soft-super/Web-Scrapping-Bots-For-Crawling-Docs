@@ -6,7 +6,6 @@ sys.setdefaultencoding('utf8')
 
 import time
 import logging
-import unicodedata
 
 from selenium import webdriver
 from selenium.webdriver.support.select import Select
@@ -52,8 +51,8 @@ class Bot(object):
             options=options,
             executable_path='geckodriver'
         )
-        driver.set_page_load_timeout(15)
-        driver.implicitly_wait(15)
+        driver.set_page_load_timeout(30)
+        driver.implicitly_wait(30)
         driver.set_window_size(1360, 900)
 
         return driver
@@ -181,20 +180,12 @@ class Bot(object):
                 'consultaProcessoDocumentoForm:'
                 'comboTipoDocumentoDecoration:comboTipoDocumento'
             ))
-            try:
-                for sw in search_words:
-                    search_word = unicodedata.normalize('NFKD', sw).lower()
-
-                    for index, option in enumerate(select_type.options):
-                        encoded_option = unicodedata.normalize('NFKD',
-                                                               option.text).lower()
-
-                        if search_word == encoded_option:
-                            select_type.select_by_index(index)
-                            raise StopIteration
-
-            except StopIteration:
-                pass
+            for sw in search_words:
+                try:
+                    select_type.select_by_visible_text(sw)
+                except Exception:
+                    continue
+                break
 
             if not self.is_visible_element('id',
                                            'consultaProcessoDocumentoForm:searchButon'):
@@ -275,4 +266,5 @@ if __name__ == '__main__':
     search_words = [u"Sentença"]
     b.parse('0001329-25.2012.5.01.0341', search_words)
     b.parse('0010059-02.2015.5.01.0541', search_words)
+
     b.driver.quit()
