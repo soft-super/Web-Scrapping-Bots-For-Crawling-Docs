@@ -13,7 +13,7 @@ ipaddress==1.0.17
 keyring==10.6.0
 keyrings.alt==3.0
 pdfkit==0.6.1
-Pillow==5.4.1
+Pillow==6.2.0
 pycrypto==2.6.1
 pyperclip==1.7.0
 PyVirtualDisplay==0.2.1
