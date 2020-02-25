@@ -4,7 +4,7 @@ backports.functools-lru-cache==1.5
 beautifulsoup4==4.7.1
 certifi==2018.11.29
 chardet==3.0.4
-cryptography==2.1.4
+cryptography==2.3
 EasyProcess==0.2.5
 enum34==1.1.6
 freeze==1.0.10
